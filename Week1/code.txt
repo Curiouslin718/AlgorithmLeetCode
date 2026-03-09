@@ -1,0 +1,73 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+
+
+class Solution {
+private:
+    int ma[100000];
+    bool lev[100000];
+public:
+    
+    void scan(TreeNode* root,int x,int max[],bool level[]){
+        
+        if((x%2==0 && root->val%2==0) || (x%2==1 && root->val%2==1)){
+                level[x] = false;
+        }
+
+        if(x%2==0){
+            if(root->val > max[x]){
+                max[x] = root->val;
+            }else{
+                level[x] = false;
+            }
+        }else{
+            if(root->val < max[x]){
+                max[x] = root->val;
+            }else{
+                level[x] = false;
+            }
+        }
+        
+
+        if(root->left!=NULL){
+            scan(root->left,x+1,max,level);
+        }
+
+        if(root->right!=NULL){
+            scan(root->right,x+1,max,level);
+        }
+        
+        return;
+    }
+    bool isEvenOddTree(TreeNode* root) {
+            
+            for (int i=0;i<100000;i++){
+                if(i%2==0){
+                    ma[i] = 0;
+                }else{ma[i] = 2000000;}
+            }
+
+            
+            for (int i=0;i<100000;i++){
+                lev[i] = true;
+            }
+            scan(root,0,ma,lev);
+           for(int i=0;i<100000;i++){
+                if(lev[i]==false){
+                    
+                    return false;
+                }
+           }
+
+           return true;
+    }
+};
