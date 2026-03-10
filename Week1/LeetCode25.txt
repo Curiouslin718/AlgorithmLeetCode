@@ -1,0 +1,73 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode* reverseHead = NULL; //Create every K-group of reverse node
+        ListNode* track = head; // Track the original list
+        ListNode* reverseTrack ; //Track the tail  of k-group list to input object
+        ListNode* List = NULL; //New link-list
+        ListNode* ListTrack; //Track the tail of list to input new k-group
+
+        //Calculate the number of nodes
+        int count = 1;
+        ListNode* cal = head;
+        while(cal->next!=NULL){
+            count++;
+            cal=cal->next;
+        }
+
+        //Reverse order for each k nodes
+        int l;
+        while(count>=k){ //count in multiple of k
+            l=k;
+            reverseHead = NULL;
+
+            //Reverse order of a group of k nodes
+            while(l>0){ 
+                reverseTrack = reverseHead;
+                reverseHead = track;
+                track = track->next;
+                reverseHead->next = reverseTrack;
+                l--;
+            }
+
+            //Put every new order nodes to new list
+            if(!List){
+                List = reverseHead;
+            }else{
+                ListTrack = List;
+                while(ListTrack->next!=NULL){
+                    ListTrack = ListTrack->next;
+                }
+                ListTrack->next = reverseHead;
+            }
+
+            count-=k;
+        }
+
+
+        //Put the left-out nodes into new list
+        ListTrack = List;
+        while(ListTrack->next!=NULL){
+            ListTrack = ListTrack->next;
+        }
+        
+        while(track != NULL){
+            ListTrack->next = track;
+            ListTrack = ListTrack->next;
+            track = track->next;
+            
+        }
+
+        return List;
+    }
+};
