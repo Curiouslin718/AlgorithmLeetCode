@@ -1,0 +1,82 @@
+class Solution {
+public:
+    void merge(vector<int>& nums,int left, int mid, int right){
+        int p = mid-left+1;
+        int q = right-mid;
+
+        vector<int> L; vector<int> R;
+        
+        for(int i=0;i<p;i++){
+            L.push_back(nums[left + i]);
+            
+        }
+        for(int i=0;i<q;i++){
+            R.push_back(nums[mid + i + 1]);
+            
+        }
+
+        int l=0;int r=0;int k=left;
+        while(l<p && r<q){
+            
+            if(L[l] <= R[r]){
+                nums[k] = L[l];
+                l++;
+            }else{
+                nums[k] = R[r];
+                r++; 
+            }
+                
+            k++;
+        }
+
+        while(l<p){
+            nums[k] = L[l];
+            l++; k++;
+        }
+        while(r<q){
+            nums[k] = R[r];
+            r++; k++;             
+        }
+
+        
+        return;
+    }
+    void sort(vector<int>& nums,int left, int right){
+        if(left>=right){
+            return;
+        }
+
+        int mid = (left + right)/2;
+
+        sort(nums, left, mid);
+        sort(nums, mid+1, right);
+
+        merge(nums, left, mid, right);
+        return;
+    }
+    void wiggleSort(vector<int>& nums) {
+        //sort the array be ascending order
+        sort(nums,0,nums.size()-1);
+        //devide sorted array into small half and large half
+        int mid = (nums.size()-1)/2; int ri = nums.size()-1;
+
+        bool change=true;
+        vector<int> temp;
+
+        //take tail of these half until one half is empty
+        while(mid>=0 || ri>(nums.size()-1)/2){
+            if(change){
+                temp.push_back(nums[mid]);
+                mid--;
+                change  = false;
+            }else{
+                temp.push_back(nums[ri]);
+                ri--;
+                change = true;
+            }
+        }
+        
+        //put new sorted array to original
+        nums = temp;
+    }
+};
