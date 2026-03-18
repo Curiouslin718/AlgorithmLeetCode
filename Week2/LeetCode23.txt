@@ -1,0 +1,111 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    void merge(vector<ListNode*>& stack){
+        //create left and right node
+        ListNode* R;
+        if(!stack.empty()){
+            R = stack.back();
+            stack.pop_back();//pop out from stack
+        }else{
+            R = NULL;
+        }
+
+        ListNode* L;
+        if(!stack.empty()){
+            L = stack.back();
+            stack.pop_back();//pop out from stack
+        }else{
+            L = NULL;
+        }
+        
+        //new node to store conbination of two nodes
+        ListNode* temp = NULL;
+        ListNode* head = NULL;
+
+        //conbination of two nodes
+        while(L!= NULL && R != NULL){
+            if(L->val <= R->val){
+                if(temp!=NULL){
+                    temp->next =new ListNode(L->val);
+                    temp = temp->next;
+                }else{
+                    temp = new ListNode(L->val);
+                    head = temp;
+                }
+                L = L->next;
+            }else{
+                if(temp!=NULL){
+                    temp->next =new ListNode(R->val);
+                    temp = temp->next;
+                }else{
+                    temp = new ListNode(R->val);
+                    head = temp;
+                }
+                R = R->next;
+            }
+        }
+        while(R != NULL){
+            if(temp!=NULL){
+                temp->next =new ListNode(R->val);
+                temp = temp->next;
+            }else{
+                temp = new ListNode(R->val);
+                head = temp;
+            }
+            R = R->next;
+        }
+        while(L != NULL){
+            if(temp!=NULL){
+                temp->next =new ListNode(L->val);
+                temp = temp->next;
+            }else{
+                temp = new ListNode(L->val);
+                head = temp;
+            }
+            L = L->next;
+        }
+
+        //push new conbinated node into stack
+        stack.push_back(head);
+        return;
+    }
+
+    void devide(vector<ListNode*>& lists,vector<ListNode*>& stack, int left, int right){
+        //check if only one node or no node
+        if(left == right){
+            stack.push_back(lists[left]); //puch one node into stack
+            return;
+        }else if(left > right){
+            return;
+        }
+
+        int mid = (left+right)/2;
+
+        devide(lists, stack,left, mid);
+        devide(lists, stack,mid+1, right);
+
+        merge(stack);
+
+        return;
+    }
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        vector<ListNode*> stack;
+        devide(lists, stack,0,lists.size()-1);
+        if(!stack.empty()){
+            return stack.back();
+        }else{
+            return NULL;
+        }
+        
+    }
+};
