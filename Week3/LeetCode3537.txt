@@ -1,0 +1,31 @@
+class Solution {
+public:
+    int cnt = 0;
+    void devide(vector<vector<int>>& grid,int row,int col,int n){
+        if(n==0){
+            grid[row][col] = cnt;
+            cnt++;
+            return;
+        }
+
+        int mid = 1;
+        for(int i=0;i<n-1;i++){
+            mid*=2;
+        }
+
+        devide(grid,row,col+mid,n-1);
+        devide(grid,row+mid,col+mid,n-1);
+        devide(grid,row+mid,col,n-1);
+        devide(grid,row,col,n-1);
+
+    }
+    vector<vector<int>> specialGrid(int n) {
+        int sum = 1;
+        for(int i=0;i<n;i++){
+            sum *=2;
+        }
+        vector<vector<int>> grid(sum,vector<int>(sum));
+        devide(grid,0,0,n);
+        return grid;
+    }
+};
