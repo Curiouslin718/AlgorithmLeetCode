@@ -1,0 +1,103 @@
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+    struct Node {
+        int mn, mx, lazy;
+    };
+    vector<Node> tr;
+
+    void build(int u, int l, int r) {
+        tr[u].mn = tr[u].mx = tr[u].lazy = 0;
+        if (l == r) return;
+        int mid = l + (r - l) / 2;
+        build(u << 1, l, mid);
+        build(u << 1 | 1, mid + 1, r);
+    }
+
+    void apply(int u, int v) {
+        tr[u].mn += v;
+        tr[u].mx += v;
+        tr[u].lazy += v;
+    }
+
+    void pushdown(int u) {
+        if (tr[u].lazy != 0) {
+            apply(u << 1, tr[u].lazy);
+            apply(u << 1 | 1, tr[u].lazy);
+            tr[u].lazy = 0;
+        }
+    }
+
+    void pushup(int u) {
+        tr[u].mn = min(tr[u << 1].mn, tr[u << 1 | 1].mn);
+        tr[u].mx = max(tr[u << 1].mx, tr[u << 1 | 1].mx);
+    }
+
+    void modify(int u, int l, int r, int L, int R, int v) {
+        if (L <= l && r <= R) {
+            apply(u, v);
+            return;
+        }
+        pushdown(u);
+        int mid = l + (r - l) / 2;
+        if (L <= mid) modify(u << 1, l, mid, L, R, v);
+        if (R > mid) modify(u << 1 | 1, mid + 1, r, L, R, v);
+        pushup(u);
+    }
+
+    int query(int u, int l, int r, int target) {
+        // If the target is strictly outside the range of values in this segment, it's not here
+        if (tr[u].mn > target || tr[u].mx < target) return -1;
+        if (l == r) return l; // Reached the leaf node
+        
+        pushdown(u);
+        int mid = l + (r - l) / 2;
+        
+        // Because adjacent prefix sum values differ by at most 1 (Discrete Intermediate Value Theorem), 
+        // if the target is within the min/max bounds of the left child, it GUARANTEES the target exists there.
+        if (tr[u << 1].mn <= target && target <= tr[u << 1].mx) {
+            return query(u << 1, l, mid, target);
+        } else {
+            return query(u << 1 | 1, mid + 1, r, target);
+        }
+    }
+
+public:
+    int longestBalanced(vector<int>& nums) {
+        int n = nums.size();
+        tr.resize((n + 1) * 4);
+        build(1, 0, n);
+
+        unordered_map<int, int> last;
+        int now = 0;
+        int ans = 0;
+
+        for (int i = 1; i <= n; ++i) {
+            int x = nums[i - 1];
+            int det = (x & 1) ? 1 : -1;
+
+            // Revoke the contribution of this number's previous occurrence
+            if (last.count(x)) {
+                modify(1, 0, n, last[x], n, -det);
+                now -= det;
+            }
+            
+            // Add the new contribution
+            last[x] = i;
+            modify(1, 0, n, i, n, det);
+            now += det;
+
+            // Find the furthest left index that perfectly balances out our current prefix sum
+            int pos = query(1, 0, n, now);
+            if (pos != -1) {
+                ans = max(ans, i - pos);
+            }
+        }
+
+        return ans;
+    }
+};
