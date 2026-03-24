@@ -1,0 +1,97 @@
+//segment tree
+class Node {
+public:
+    int l, r;
+    long long s00, s01, s10, s11;
+
+    Node(int l, int r)
+        : l(l)
+        , r(r)
+        , s00(0) //maximum sum of a sequence excluding head and tail elements
+        , s01(0) //maximum sum of a sequence excluding head and including tail elements
+        , s10(0) //maximum sum of a sequence including head and excluding tail elements
+        , s11(0) {} //maximum sum of a sequence including head and tail elements
+};
+
+class SegmentTree {
+public:
+    vector<Node*> tr;
+
+    SegmentTree(int n)
+        : tr(n << 2) { //4 times of n nodes to avoid overflow
+        build(1, 1, n);
+    } //constructor
+
+    void build(int u, int l, int r) {
+        tr[u] = new Node(l, r);
+        if (l == r) {
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(u << 1, l, mid); //u=u*2 and loading sequence from l to mid
+        build(u << 1 | 1, mid + 1, r); //u=u*2+1 and loading sequence from mid+1 to r
+    }
+
+    long long query(int u, int l, int r) {
+        if (tr[u]->l >= l && tr[u]->r <= r) {
+            return tr[u]->s11; //output maximum sum of goal sequence including head and tail elements
+        }
+        int mid = (tr[u]->l + tr[u]->r) >> 1; 
+        long long ans = 0;
+        if (l <= mid) {
+            ans = query(u << 1, l, r); //find left node
+        }
+        if (r > mid) {
+            ans = max(ans, query(u << 1 | 1, l, r)); //find left node and compare the answer from left node
+        }
+        return ans;
+    }
+
+    void pushup(int u) {
+        Node* left = tr[u << 1];
+        Node* right = tr[u << 1 | 1];
+        //choose left tail including or right head including 
+        tr[u]->s00 = max(left->s00 + right->s10, left->s01 + right->s00);//left head and right tail excluding 
+        tr[u]->s01 = max(left->s00 + right->s11, left->s01 + right->s01);//left head excluding and right tail including 
+        tr[u]->s10 = max(left->s10 + right->s10, left->s11 + right->s00);//left head including and right tail excluding
+        tr[u]->s11 = max(left->s10 + right->s11, left->s11 + right->s01);//left head and right tail including 
+    }
+
+    void modify(int u, int x, int v) {
+        if (tr[u]->l == tr[u]->r) {
+            tr[u]->s11 = max(0LL, (long long) v); //one element has maximum including head and tail. if v>0 return v,else return 0
+            return;
+        }
+        int mid = (tr[u]->l + tr[u]->r) >> 1;
+        if (x <= mid) {
+            modify(u << 1, x, v); //check left node
+        } else {
+            modify(u << 1 | 1, x, v); //check right node
+        }
+        pushup(u);
+    }
+
+    ~SegmentTree() {
+        for (auto node : tr) {
+            delete node;
+        }
+    }
+};
+
+class Solution {
+public:
+    int maximumSumSubsequence(vector<int>& nums, vector<vector<int>>& queries) {
+        int n = nums.size();
+        SegmentTree tree(n);
+        for (int i = 0; i < n; ++i) {
+            tree.modify(1, i + 1, nums[i]);
+        }
+        long long ans = 0;
+        const int mod = 1e9 + 7;
+        for (const auto& q : queries) {
+            tree.modify(1, q[0] + 1, q[1]);
+            ans = (ans + tree.query(1, 1, n)) % mod;
+        }
+        return (int) ans;
+    }
+};
