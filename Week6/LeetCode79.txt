@@ -1,0 +1,54 @@
+ int x[4] = {-1,0,1,0};
+    int y[4] = {0,1,0,-1};
+bool DFS(int row,int col,vector<vector<char>>& board,vector<vector<int>>& p,int f,string s){
+    if(board[row][col] != s[f]){
+        return false;
+    }
+    if(f==s.size()-1){
+        cout<<f<<" "<<row<<" "<<col<<endl;
+        return true;
+    }
+    p[row][col] = 1;
+    bool find = false;
+    for(int i=0;i<4;i++){
+        if(row+y[i]>=0 && row+y[i]< board.size() && col+x[i]>=0 && col+x[i]<board[0].size()&& p[row+y[i]][col+x[i]] == 0){
+            if(DFS(row+y[i],col+x[i],board,p,f+1,s)){
+                find = true;
+                break;
+            }
+        }
+    }
+    p[row][col] = 0;
+
+    return find;
+    
+}
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        vector<vector<int>> pass;
+        for (int i = 0; i < board.size(); i++) {
+            vector<int> temp; // 建立暫存列
+            for (int j = 0; j < board[0].size(); j++) {
+                temp.push_back(0);
+            }
+            pass.push_back(temp); // 把整列塞進去
+        }
+        int fit = 0;
+        bool findAll = false;
+        for(int i=0;i<board.size();i++){
+            for(int j=0;j<board[0].size();j++){
+                if(DFS(i,j,board,pass,fit,word)){
+                    cout<<i<<" "<<j<<endl;
+                    findAll = true;
+                    break;
+                }
+            }
+            if(findAll){
+                break;
+            }
+        }
+
+        return findAll;
+    }
+};
