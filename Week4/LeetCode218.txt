@@ -1,0 +1,36 @@
+class Solution {
+public:
+    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
+        vector<pair<int, int>> events;
+        for (auto& b : buildings) {
+            // 左邊界高度用負數，方便排序處理
+            events.push_back({b[0], -b[2]}); 
+            events.push_back({b[1], b[2]});
+        }
+
+        // 排序準則：x 小的在前；x 相同時，高度小的在前（負數高度小 = 實際高度高）
+        sort(events.begin(), events.end());
+
+        vector<vector<int>> res;
+        multiset<int> heights = {0}; // 初始地平線高度為 0
+        int prev_max = 0;
+
+        for (auto& e : events) {
+            int x = e.first;
+            int h = e.second;
+
+            if (h < 0) {
+                heights.insert(-h); // 左邊界，加入高度
+            } else {
+                heights.erase(heights.find(h)); // 右邊界，移除一個高度
+            }
+
+            int curr_max = *heights.rbegin(); // 取得當前最大高度
+            if (curr_max != prev_max) {
+                res.push_back({x, curr_max}); // 高度變化，記錄轉折點
+                prev_max = curr_max;
+            }
+        }
+        return res;
+    }
+};
