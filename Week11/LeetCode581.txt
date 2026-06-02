@@ -1,0 +1,32 @@
+class Solution {
+public:
+    int findUnsortedSubarray(vector<int>& nums) {
+        int start = -1; int end = -1;
+        for(int i=1;i<nums.size();i++){
+            if(nums[i] < nums[i-1]){
+                int com = nums[i-1];
+                while(i<nums.size() && nums[i]< com){
+                    i++;
+                }
+                end = i-1;
+            }
+        }
+
+        for(int i=nums.size()-2;i>=0;i--){
+            if(nums[i] > nums[i+1]){
+                cout<<i<<endl;
+                int com = nums[i+1];
+                while(i>=0 && nums[i]> com){
+                    i--;
+                }
+                start = i+1;
+            }
+        }
+        cout<<start<<" "<<end;
+        if(start<0){
+            return 0;
+        }else{
+            return end-start+1;
+        }
+    }
+};
